@@ -1,7 +1,7 @@
 /* 个人工作台 · 离线缓存
    策略：页面用「网络优先」，保证每天打开都是最新内容；断网时回落到缓存。
    图标/清单这类不变的资源用「缓存优先」。 */
-const CACHE = "workbench-v1";
+const CACHE = "workbench-v2";
 const ASSETS = [
   "./",
   "./index.html",
