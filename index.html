@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>个人工作台</title>
+<meta name="theme-color" content="#b4622d">
+<style>
+:root{
+  --bg:#f6f5f3; --card:#ffffff; --line:#e8e5e0; --text:#22201d; --sub:#7b746c;
+  --accent:#b4622d; --accent-soft:#f6ece4; --green:#3f7d58; --green-soft:#e8f1ec;
+  --nav:#ffffff; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);
+  --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.65;
+  padding-bottom:calc(78px + env(safe-area-inset-bottom));
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 14px}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:50;background:rgba(246,245,243,.92);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.hd{display:flex;align-items:center;gap:10px;padding:12px 0 10px}
+.hd h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.5px;flex:0 0 auto}
+.hd .sub{font-size:11px;color:var(--sub);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.favbtn{
+  flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--text);
+  border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;
+}
+.favbtn.on{background:var(--accent-soft);border-color:#e6cfc0;color:var(--accent)}
+.favbtn.sync{font-size:12px;padding:5px 9px}
+
+/* 搬家面板 */
+#syncpanel{display:none}
+#syncpanel.show{display:block}
+.syncbox{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 15px;margin-top:12px;box-shadow:var(--shadow);
+  border-left:3px solid var(--accent);
+}
+.syncbox h4{margin:0 0 4px;font-size:14px;font-weight:700}
+.syncbox p.tip{font-size:12.5px;color:var(--sub);margin:0 0 10px;line-height:1.6}
+.syncbox textarea{
+  width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  color:var(--text);background:#faf9f7;outline:none;resize:vertical;line-height:1.5;
+}
+.syncbox textarea:focus{border-color:var(--accent)}
+.syncacts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.minibtn{
+  border:1px solid var(--line);background:#fff;color:var(--text);border-radius:9px;
+  padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;
+}
+.minibtn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.searchbox{padding:0 0 10px}
+.searchbox input{
+  width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;
+  padding:8px 12px;font-size:14px;color:var(--text);outline:none;font-family:inherit;
+}
+.searchbox input:focus{border-color:var(--accent)}
+
+/* banners */
+.banner{
+  background:#fdf6ec;border:1px solid #f0e0c8;color:#8a5a1f;
+  border-radius:10px;padding:8px 12px;font-size:12.5px;margin:12px 0 0;
+}
+
+/* cards */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 15px;margin-top:12px;box-shadow:var(--shadow);
+}
+.card h3{margin:0 0 6px;font-size:15.5px;line-height:1.45;font-weight:650}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.tag{font-size:11px;color:var(--sub);background:#f2efe9;border-radius:5px;padding:1px 7px}
+.tag.src{background:var(--accent-soft);color:var(--accent)}
+.sum{font-size:14px;color:#4a453f;margin:0 0 10px;white-space:pre-wrap}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.linkbtn{
+  display:inline-flex;align-items:center;gap:5px;text-decoration:none;
+  background:var(--accent);color:#fff;border-radius:9px;padding:7px 13px;font-size:13.5px;
+}
+.linkbtn.ghost{background:#fff;color:var(--accent);border:1px solid #e6cfc0}
+.star{
+  margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:9px;
+  padding:6px 11px;font-size:13px;cursor:pointer;color:var(--sub);
+}
+.star.on{background:var(--accent-soft);border-color:#e6cfc0;color:var(--accent)}
+.star.sm{font-size:12px;padding:4px 9px}
+
+/* section titles */
+.sect{display:flex;align-items:baseline;gap:8px;margin:20px 0 0}
+.sect h2{margin:0;font-size:16px;font-weight:700}
+.sect .note{font-size:12px;color:var(--sub)}
+
+/* lessons */
+.stage{margin-top:18px}
+.stage-h{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.stage-h .num{
+  width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+  font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto;
+}
+.stage-h h2{margin:0;font-size:15px;font-weight:700}
+.stage-d{font-size:12.5px;color:var(--sub);margin:0 0 10px 30px}
+.lesson{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 15px;margin-top:10px;box-shadow:var(--shadow);
+  border-left:3px solid var(--line);
+}
+.lesson.done{border-left-color:var(--green);background:#fbfdfb}
+.lesson h3{margin:0 0 8px;font-size:15px;font-weight:650;display:flex;gap:8px;align-items:flex-start}
+.lesson h3 .ck{color:var(--green);flex:0 0 auto;font-size:14px}
+.lbl{font-size:12px;font-weight:700;color:var(--accent);margin:10px 0 4px;letter-spacing:.3px}
+.lbl.warn{color:#a03b2b}
+ul.pts{margin:0;padding-left:18px;font-size:14px;color:#4a453f}
+ul.pts li{margin-bottom:3px}
+dl.con{margin:0;font-size:13.5px}
+dl.con dt{font-weight:700;color:var(--text);margin-top:7px}
+dl.con dd{margin:1px 0 0;color:#4a453f}
+.links{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.links a{
+  text-decoration:none;color:#2f6ea8;background:#f2f6fa;border-radius:8px;
+  padding:7px 11px;font-size:13px;display:flex;gap:6px;align-items:center;word-break:break-all;
+}
+.links a span.f{color:var(--sub);flex:0 0 auto}
+.lesson-foot{display:flex;align-items:center;gap:8px;margin-top:11px}
+.donebtn{
+  border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:9px;
+  padding:6px 12px;font-size:13px;cursor:pointer;
+}
+.donebtn.on{background:var(--green-soft);border-color:#cfe0d5;color:var(--green)}
+
+/* progress */
+.prog{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 15px;margin-top:12px;box-shadow:var(--shadow);
+}
+.prog .bar{height:7px;background:#ece8e2;border-radius:999px;overflow:hidden;margin:8px 0 6px}
+.prog .bar i{display:block;height:100%;background:var(--green);border-radius:999px;transition:width .3s}
+.prog .t{font-size:13px;color:#4a453f}
+.prog .t b{color:var(--green)}
+.gobtn{
+  border:1px solid #cfe0d5;background:var(--green-soft);color:var(--green);
+  border-radius:9px;padding:6px 12px;font-size:13px;cursor:pointer;margin-top:8px;
+}
+
+/* 2 columns */
+.cols{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:760px){.cols{grid-template-columns:1fr 1fr;gap:0 16px}}
+.colhead{
+  margin-top:18px;padding:8px 12px;border-radius:10px;background:var(--accent-soft);
+  color:var(--accent);font-size:13.5px;font-weight:700;
+}
+.colhead.b{background:#eef2f7;color:#3a5f85}
+.why{
+  background:#fdf6ec;border-left:3px solid #e8c9a0;border-radius:8px;
+  padding:8px 11px;font-size:13px;color:#7a5320;margin:8px 0 0;
+}
+
+/* empty */
+.empty{text-align:center;color:var(--sub);font-size:13.5px;padding:40px 10px}
+
+/* bottom nav */
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--nav);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+  display:flex;overflow-x:auto;scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  flex:1 0 auto;min-width:44px;border:0;background:none;cursor:pointer;
+  padding:7px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--sub);font-size:11px;font-family:inherit;-webkit-tap-highlight-color:transparent;
+  white-space:nowrap;
+}
+@media(max-width:420px){ nav button{font-size:10px;letter-spacing:-.2px} }
+nav button .ic{font-size:18px;line-height:1;filter:grayscale(1);opacity:.55}
+nav button.on{color:var(--accent);font-weight:700}
+nav button.on .ic{filter:none;opacity:1}
+
+/* toast */
+#toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:99;
+  background:rgba(34,32,29,.92);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+#toast.show{opacity:1}
+footer{text-align:center;color:var(--sub);font-size:11.5px;padding:22px 0 8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hd">
+      <h1>个人工作台</h1>
+      <div class="sub" id="hdsub"></div>
+      <button class="favbtn sync" id="syncbtn" title="搬家：把进度和收藏复制到新文件">⇅ 搬家</button>
+      <button class="favbtn" id="favbtn">☆ 收藏夹 <span id="favn">0</span></button>
+    </div>
+    <div class="searchbox">
+      <input id="q" type="search" placeholder="在当前栏目里搜标题或内容…">
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="syncpanel">
+    <div class="syncbox">
+      <h4>⇅ 搬家：把进度和收藏带到新文件</h4>
+      <p class="tip">换了新文件后，你学到的课和收藏会清零。用下面这串码搬过去：<b>① 在旧文件里复制这串码</b> → <b>② 打开新文件，粘进下面的框点「导入」</b>。</p>
+      <textarea id="codeout" rows="3" readonly placeholder="点「复制这串码」后，会显示在这里"></textarea>
+      <div class="syncacts">
+        <button class="minibtn pri" id="btncopy">复制这串码</button>
+      </div>
+      <div style="margin-top:12px">
+        <textarea id="codein" rows="3" placeholder="把上次复制的那串码粘到这里"></textarea>
+        <div class="syncacts">
+          <button class="minibtn pri" id="btnimport">导入</button>
+          <button class="minibtn" id="btnclose">收起</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="view"></div>
+</main>
+
+<footer class="wrap">内容更新于 <span id="bd"></span> · 进度与收藏保存在本机浏览器</footer>
+
+<nav id="nav"></nav>
+<div id="toast"></div>
+
+<script>
+/* ---- PWA：只在 http(s) 下接管，本地双击打开不受影响 ---- */
+(function(){
+  if(!location.protocol.startsWith("http")) return;
+  try{
+    var m=document.createElement("link"); m.rel="manifest"; m.href="manifest.json"; document.head.appendChild(m);
+    var a=document.createElement("link"); a.rel="apple-touch-icon"; a.href="icon-180.png"; document.head.appendChild(a);
+  }catch(e){}
+  if("serviceWorker" in navigator){
+    addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+})();
+
+/* ============================================================
+   数据区：以后要加自动抓取，只替换 / 追加这个 DATA 对象即可
+   ============================================================ */
+const DATA = {
+  buildDate: "2026-10-22",
+
+  /* ---------- 1. AI 与一人公司（保留 7 天） ---------- */
+  ai: [
+    {id:"ai-01",date:"2026-10-16",source:"阮一峰的网络日志",
+     title:"科技爱好者周刊（第 415 期）：3D 版《看不见的城市》",
+     summary:"本期主打一个对比实验：让 Claude Opus 5.5 和 GPT-6 Astra 把卡尔维诺小说《看不见的城市》里的 55 座城市生成 3D 版，前者连原著里朦胧的粉红光线都还原了，后者 55 个城市外观雷同。还收录：有人花 600 美元、二十轮训练，在 0.8B 小模型上微调出能本机操作电脑的模型；Deno 被 Cloudflare 收购后将停止开发；以及 App 图标库、汉字字源查询等工具。每周五更新。",
+     url:"https://www.ruanyifeng.com/blog/2026/10/weekly-issue-415.html"},
+    {id:"ai-02",date:"2026-10-22",source:"36氪",
+     title:"腾讯盯上「一人公司」了？",
+     summary:"腾讯在 Tencent RTC 下推出个人业务工具 Knocket：一个页面解决「我是谁、能提供什么、怎么联系我」，自带聊天窗口、消息中心、AI Agent 和知识库，支持 AI 生成页面，核心功能免费、模型可自接。作者的判断值得记：AI 产品正从「帮你提高效率」走向「帮你做生意」，做小业务不必一上来就买 CRM、配客服系统。自媒体人、讲师、独立开发者都是目标用户。",
+     url:"https://www.36kr.com/p/4014176326717571"},
+    {id:"ai-03",date:"2026-10-15",source:"量子位",
+     title:"7 天几百元开一家店：千问办公推出电商版",
+     summary:"阿里千问办公推出电商版，定位独立第三方电商 Agent，面向所有平台商家。3D 打印鞋店主刘祥龙用它做市场调研和商品详情页，开店周期从 30 天缩到 7 天，成本从几万元降到几百元 token 费；17 人团队捌比特咖啡接入后，新品销量约为过去同类产品的 10 倍。四大功能：趋势洞察及卖点分析、爆款素材批量生成、跨平台作战台、跨平台 ROI 智能优化。小团队低成本启动生意可以参考。",
+     url:"https://news.sina.cn/ai/2026-10-15/detail-inivhiew1312606.d.html"},
+    {id:"ai-04",date:"2026-10-12",source:"少数派",
+     title:"把本地语音转写换成 MOSS：一个晚上做完选型，靠的是自己攒下的数据",
+     summary:"作者用三段自己的录音、一份自建词典和人工标注，一个晚上完成本地语音转写模型的选型，最终换上 MOSS。方法比结论更值钱：官方榜单用的是公开数据集，而自己的口音、专名才是真实场景——手里有自己的评测集，选型就快，新模型出了同一套数据再跑一遍即可。录音、改稿等原始数据别删，它们就是日后的标准答案。适合想在自己电脑上折腾 AI 的人。",
+     url:"https://sspai.com/post/115943"},
+    {id:"ai-05",date:"2026-10-15",source:"量子位智库",
+     title:"Agent 落地报告：企业智能化的六大断点",
+     summary:"报告指出企业 AI 落地的「虚假繁荣」：个人任务的高效，不等于企业经营价值的兑现。用一个「门店缺货处置」场景串出六大断点——任务定义、数据可信度、判断的可验证性、行动落地、权限责任划分、价值衡量与复制。同一个经营分析助手，技术觉得报告生成就算完成，业务要原因查清，管理者只看缺货少了没，三方标准对不上，AI 项目就停在最后一公里。",
+     url:"https://www.163.com/dy/article/L99MVN6J0511DSSR.html"},
+    {id:"ai-06",date:"2026-10-16",source:"量子位",
+     title:"DeepSeek 服务器全球宕机，神秘 Harness 账号同时现身",
+     summary:"10 月 15 日上午 8 点 11 分起，DeepSeek 网页和 API 全球性部分中断，影响对话服务、V4 Pro 和 V4.1 Flash API，第三方监测平台 24 小时内收到 86 条报障。同时一个叫 DeepSeekHarness 的账号悄悄出现在 B 站——它是 DeepSeek 的开源 Agent 运行平台，定位「一切皆插件」，负责让模型调用工具、编辑文件、拆解任务给子 Agent。故障是否为新模型铺垫没有官方证据，但时间点微妙。",
+     url:"https://www.qbitai.com/2026/10/503326.html"}
+  ],
+
+  /* ---------- 8. 每日新闻（保留 3 天） ---------- */
+  news: [
+    {id:"nw-01",date:"2026-10-21",source:"中国政府网",
+     title:"中办、国办：推动科技创新和产业创新深度融合的意见（全文）",
+     summary:"10 月 21 日发布的重磅顶层文件，围绕 6 方面提出 17 条：促进创新链产业链无缝对接、以高质量科技供给支撑现代化产业体系、企业主导的产学研融通创新等。落到企业和个人身上的实招包括：提高科技型中小企业研发费用加计扣除比例、全面实施专利开放许可、推广「创新积分制」、政府创投基金强化「投早投小投长期投硬科技」。产业应用目标明确的国家科技计划项目，原则上由企业牵头实施。",
+     url:"https://www.gov.cn/yaowen/liebiao/202610/content_7083929.htm"},
+    {id:"nw-02",date:"2026-10-21",source:"新华社",
+     title:"新华视点：科技创新和产业创新深度融合，未来这样干",
+     summary:"新华社请专家解读前一天发布的中办国办意见：文件摆脱了「先有成果后考虑转化」的惯性思维，从源头要求科技创新和产业创新一体谋划、双向联动。针对的堵点很具体——科研人员手握好成果难以匹配产业需求、企业因多种原因不愿创新不能创新、前沿技术「样品易出、量产困难」。专家评价：这是「十五五」时期科技与产业融合的路线图和任务书，举措瞄准堵点卡点，实操性强。",
+     url:"https://app.xinhuanet.com/news/article.html?articleId=202610218faf0548d6a74f8db999c141d1dd8f9b"},
+    {id:"nw-03",date:"2026-10-22",source:"人民网",
+     title:"前三季度医保统筹基金支出超 1.7 万亿元",
+     summary:"国家医保局 10 月 21 日发布数据：今年 1–9 月基本医保（含生育保险）统筹基金总收入 23028.33 亿元，总支出 17515.19 亿元，收支保持平衡略有结余。其中职工医保统筹基金支出 10044.28 亿元（含生育保险待遇支出 1010.10 亿元），城乡居民医保支出 7470.91 亿元。这个盘子直接关系每个人看病报销的额度，也是判断医保政策走向的基础数据。",
+     url:"https://society.people.com.cn/n1/2026/1022/c1008-40819153.html"},
+    {id:"nw-04",date:"2026-10-21",source:"央视网",
+     title:"「十五五」将建 30 家左右专精特新赋能中心",
+     summary:"工信部 10 月 21 日印发通知，「十五五」期间在全国建设 30 家左右专精特新赋能中心，搭建全国性服务网络，专门服务中小企业技术创新：帮企业攻关「卡脖子」技术、推动成果产业化、支持参与标准研制、组织产业链供需对接。明确不对现有机构简单挂牌，防止「重挂牌轻实效」；先筹建一年、验收合格才授牌，年度考评不达标限期整改，连续两年不合格退出。",
+     url:"https://news.cctv.cn/2026/10/21/ARTI9LAwGdJRgFHDk7ahYTW5261021.shtml"},
+    {id:"nw-05",date:"2026-10-22",source:"浙江在线",
+     title:"台风「蔷琵」逼近，浙江启动海上防台风应急响应",
+     summary:"受冷空气和第 30 号台风「蔷琵」（超强台风级）共同影响，浙江省防指 10 月 21 日 9 时启动海上防台风应急响应。预计 23–25 日浙东降水明显，24 日浙江东部大到暴雨、局部大暴雨；21–25 日浙江沿海海面持续 9–10 级阵风。「蔷琵」可能 24 日前后登陆台湾东北部后紧擦浙江沿海北上，也可能在浙江近海转向。杭州及周边未来一周多雨，出行带伞、关注临近预报。",
+     url:"https://zjnews.zjol.com.cn/zjnews/202610/t20261022_31981014.shtml"},
+    {id:"nw-06",date:"2026-10-22",source:"腾讯新闻",
+     title:"国家癌症中心公布发病前五癌症；前三季度外贸进出口增长 18.8%",
+     summary:"国家癌症中心最新分析：2024 年全国恶性肿瘤新发约 515.06 万例、死亡约 258.22 万例，发病前五位已从过去以消化道肿瘤为主，变为肺癌、乳腺癌、甲状腺癌、结直肠癌和肝癌。另一组数据：海关总署公布前三季度货物贸易进出口 39.94 万亿元、同比增长 18.8%，西安进出口增长 115.5%，有望成为中西部首个万亿外贸城市。同期发布的还有最高法《司法责任追究条例》。",
+     url:"https://news.qq.com/rain/a/20261022A023JX00"},
+    {id:"nw-07",date:"2026-10-22",source:"央视新闻",
+     title:"早啊！新闻来了〔2026.10.22〕",
+     summary:"当日要闻速览：中办、国办部署推动科技创新和产业创新深度融合；前三季度医保统筹基金支出超 1.7 万亿元；央行今日发行长征胜利 90 周年金银纪念币一套；市场监管总局发布《电动汽车动力蓄电池在役检测试验方法》国家标准，2027 年 3 月 1 日起实施，覆盖电池隐患排查和二手车交易检测；台风「蔷琵」向我国靠近，中国气象局启动四级应急响应。适合当作一天的信息底稿。",
+     url:"https://k.sina.cn/article_2656274875_9e5389bb01902wavo.html"}
+  ],
+
+  /* ---------- 2. 心理学学习路径（永久保留） ---------- */
+  psych: [
+    {id:"ps1",name:"普通心理学基础",desc:"先把「心理现象有哪些、怎么研究」这套坐标系搭起来，后面所有流派都是在回答同一批问题的不同答案。",
+     lessons:[
+      {id:"psy-101",title:"心理学到底研究什么：心理过程与个性心理",
+       points:["研究对象是心理现象，分两大类：心理过程（认知、情绪情感、意志）和个性心理（需要/动机/兴趣，能力/气质/性格）","行为是心理的外部表现，心理学通过可观察的行为去推断内部心理规律","四个目标依次递进：描述 → 解释 → 预测 → 控制（干预）","学科分基础心理学（普通、发展、认知、人格、社会、生理）与应用心理学（临床咨询、教育、工业组织等）"],
+       concepts:[{t:"心理过程",d:"认知（感知觉、记忆、思维、想象、语言）、情绪情感、意志，是动态发生发展的过程。"},{t:"个性心理",d:"在心理过程中表现出来的稳定特征，分个性倾向性（需要、动机）和个性心理特征（能力、气质、性格）。"}],
+       links:[{t:"心理学：理解人类心智与行为的科学",u:"https://tidenews.com.cn/tmh_news.html?id=6a33bf52bcb60600013c65aa"},{t:"心理学（学科体系与研究对象）",u:"https://baike.weixin.qq.com/v10005059025.htm?baike_inner=chain"}]},
+      {id:"psy-102",title:"心理学的四次范式革命：为什么会有这么多流派",
+       points:["先建立历史感：流派不是「谁对谁错」，而是范式更替","构造主义→行为主义：研究对象从意识构造变成可观察行为，人被视为被动客体","行为主义→认知心理学：重新把人当作主动的信息加工者，研究感知、记忆、思维","精神分析革命：从实验心理学外部发起，把人看成受无意识冲动支配的存在","人本主义革命（第三势力）：反对决定论，认为人是自主、有创造性、朝向自我实现的主体"],
+       concepts:[{t:"范式",d:"一个时期心理学共同体共同接受的研究对象、方法与人的假设。范式换了，问题和答案都跟着换。"},{t:"决定论 vs 自主性",d:"行为主义和精神分析都把人看作被某种力量决定的客体；人本主义把人还原为积极行动的主体。这是理解流派分歧的主轴。"}],
+       links:[{t:"科普中国：心理学四次科学革命",u:"https://www.kepuchina.cn/article/articleinfo?business_type=100&ar_id=241253"}]},
+      {id:"psy-103",title:"研究方法与「科学与否」的边界",
+       points:["实验法能确立因果；相关研究只能说明共变，相关≠因果","自变量是被操纵的，因变量是被测量的，混淆变量要控制","可重复性危机：心理学有一批经典效应在大样本重复中未能复现，看结论时要看是否有元分析或重复研究支撑","区分「科学心理学」与「通俗心理学」：前者有可检验的操作定义和数据，后者常是事后解释"],
+       concepts:[{t:"操作定义",d:"把抽象概念（如焦虑）转成可测量指标（量表得分、心率、回避行为），是可检验的前提。"},{t:"可重复性",d:"同样的程序换个样本还能得到同样结果，是判断一个结论靠不靠谱的第一道筛子。"}],
+       links:[{t:"心理学：理解人类心智与行为的科学",u:"https://tidenews.com.cn/tmh_news.html?id=6a33bf52bcb60600013c65aa"}]}
+     ]},
+    {id:"ps2",name:"主要流派",desc:"四个流派各抓住人的一面。学的时候别急着站队，先看每个流派提出的核心问题是什么。",
+     lessons:[
+      {id:"psy-201",title:"精神分析：无意识、人格结构与防御机制",
+       points:["弗洛伊德把目光投向意识之下的无意识，认为行为受本能冲动（尤其性与攻击）驱动","人格结构三层：本我（快乐原则）、自我（现实原则）、超我（道德原则）","童年期创伤经验被压抑进无意识，成为成年心理问题的根源","防御机制：压抑、投射、合理化、退行、升华等，是自我缓解焦虑的无意识策略","方法上主要用临床法研究异常行为，对文学、艺术、文化研究影响深远"],
+       concepts:[{t:"无意识",d:"不被觉察但影响行为与情绪的心理内容。精神分析的核心假设。"},{t:"防御机制",d:"自我为缓解冲突与焦虑而采用的无意识策略；适度有保护作用，过度则扭曲现实。"}],
+       links:[{t:"心理学：理解人类心智与行为的科学（四大势力）",u:"https://tidenews.com.cn/tmh_news.html?id=6a33bf52bcb60600013c65aa"},{t:"科普中国：心理学四次科学革命",u:"https://www.kepuchina.cn/article/articleinfo?business_type=100&ar_id=241253"}]},
+      {id:"psy-202",title:"行为主义：刺激-反应、强化与惩罚",
+       points:["华生创立，主张心理学只研究可观察可测量的行为，反对研究意识","经典条件反射（巴甫洛夫）：中性刺激与无条件刺激配对后获得引发反应的能力","操作性条件反射（斯金纳）：行为后果决定行为频率，强化增加、惩罚减少","强化程序：连续强化学得快，间歇强化更持久、更难消退","今天的落地形态：暴露疗法、行为激活、习惯养成设计"],
+       concepts:[{t:"强化",d:"跟随行为之后、使该行为未来发生概率上升的后果；分正强化（给予）和负强化（移除厌恶刺激）。"},{t:"消退",d:"强化停止后行为逐渐减少。行为矫正里常用「消退+替代行为强化」的组合。"}],
+       links:[{t:"心理学：理解人类心智与行为的科学",u:"https://tidenews.com.cn/tmh_news.html?id=6a33bf52bcb60600013c65aa"}]},
+      {id:"psy-203",title:"人本主义：需要层次、自我实现与以人为中心",
+       points:["被称为第三势力，批评精神分析只看病态、行为主义把人当动物和机器","马斯洛需要层次：生理→安全→归属与爱→尊重→自我实现","罗杰斯开创以人为中心疗法，核心条件是真诚、无条件积极关注、共情","核心假设：人的基本倾向是朝向成长与自我实现，不是被本能或环境单向决定","对咨询的启示：关系本身就是疗效因子，技术排在关系之后"],
+       concepts:[{t:"无条件积极关注",d:"不因来访者的行为表现而增减的接纳，是让人敢于直面真实经验的前提。"},{t:"自我实现",d:"潜能被充分展开的状态；马斯洛强调它是「成为你能成为的人」，不是成功学意义上的赢。"}],
+       links:[{t:"心理学：理解人类心智与行为的科学",u:"https://tidenews.com.cn/tmh_news.html?id=6a33bf52bcb60600013c65aa"},{t:"科普中国：心理学四次科学革命",u:"https://www.kepuchina.cn/article/articleinfo?business_type=100&ar_id=241253"}]},
+      {id:"psy-204",title:"认知心理学：把人当作信息加工系统",
+       points:["1950s–70s 兴起，受二战工效研究、计算机与人工智能、语言学三重影响","1967 年奈塞尔《认知心理学》出版，标志学科正式诞生","核心隐喻：人像计算机一样接收、编码、存储、提取和输出信息","研究注意、知觉、记忆、思维、语言等内部过程","与 CBT 直接相连：认知心理学的「信息加工偏差」假设是认知行为疗法的理论底座"],
+       concepts:[{t:"信息加工",d:"把心理活动拆成输入—编码—存储—提取—输出的环节，便于定位问题出在哪一环。"},{t:"认知偏差",d:"信息加工过程中系统性的偏离，如注意偏向、记忆偏差、灾难化解释；CBT 主要在这里工作。"}],
+       links:[{t:"心理学：理解人类心智与行为的科学",u:"https://tidenews.com.cn/tmh_news.html?id=6a33bf52bcb60600013c65aa"}]}
+     ]},
+    {id:"ps3",name:"应用方向：CBT、正念、情绪管理",desc:"从理论进入可操作。这三课的重点是「今天就能用」的工具。",
+     lessons:[
+      {id:"psy-301",title:"CBT 认知行为疗法：认知三角与三层认知",
+       points:["定义：通过改变思维与行为来改变不良认知，从而消除不良情绪和行为的短程疗法","认知三角：思维、情绪、行为互相影响，构成稳定循环；干预任一一环即可推动另外两环","认知三层：自动思维（树叶）→ 中间信念（树干，态度/规则/假设）→ 核心信念（树根，关于自我他人世界的僵化整体观）","三套技术：认知技术、行为技术、正念技术","CBT 起效快、结构清晰，但更擅长焦虑、抑郁、强迫等「神经症」层面；人格结构层面的改变不是它的强项"],
+       concepts:[{t:"自动思维",d:"在具体情境下自动冒出的想法，往往未经检验就被当成事实。"},{t:"个案概念化",d:"把来访者的困扰整理成「童年经历—核心信念—中间信念—自动思维—情绪行为」的可工作结构，是 CBT 的起点。"}],
+       links:[{t:"壹心理：CBT 心理咨询——让你成为自己的心理咨询师",u:"https://www.xinli001.com/info/100492082"}]},
+      {id:"psy-302",title:"CBT 实操第一步：识别与记录自动思维（思维记录表）",
+       points:["第一步不是「反驳」，而是先当旁观者：把「我就是这个想法」改成「我观察到我有一个想法」","思维记录表四要素：情境（何时何地何人做什么）、自动思维（具体的话或画面）、情绪（命名 + 0–100 强度）、身体感觉","写完本身就有疗效：把模糊的负面信念变成可分析的客观对象，情绪强度常会下降","再做检验与重构：找支持和反对的证据、生成替代性解释","越对抗越陷得越深，识别阶段的原则是「不评判、不辩论」"],
+       concepts:[{t:"元认知",d:"对想法的想法。能从「我在想」退一步看到「我有一个想法」，是 CBT 和正念共同的起手式，可平时用正念练习训练。"},{t:"情绪强度打分",d:"0–100 的主观强度评分，用来前后对比，判断干预是否真的起作用，而不是靠感觉。"}],
+       links:[{t:"壹心理：当你的「自动思维」总在深夜造访，CBT 第一步该做什么",u:"https://m.xinli001.com/info/100503336"}]},
+      {id:"psy-303",title:"正念与 MBCT：觉察而非改变",
+       points:["正念的本质是非批判、客观、接纳地觉察当下反复出现的情绪与想法","核心命题：想法只是想法，不等于客观现实，也不等于你自己","MBCT（正念认知治疗）把正念冥想与认知理论结合，在预防抑郁症复发上证据充分","神经影像研究显示正念冥想可改变大脑皮层结构，提升注意力、减少焦虑","与 CBT 不冲突：目前多数成熟的正念疗法都以 CBT 为基础；CBT 偏「改变内容」，正念偏「改变与内容的关系」"],
+       concepts:[{t:"解离",d:"把负面情绪和想法从「我」和「客观世界」上脱钩，看见它而不被它卷走。"},{t:"MBCT",d:"正念认知治疗，面向反复发作的抑郁，核心是教会患者在复发早期识别出旧模式。"}],
+       links:[{t:"壹心理：正念疗法与认知行为疗法，是否相违背？",u:"https://www.xinli001.com/qa/100710372?page=1&from=houye-dh"}]}
+     ]},
+    {id:"ps4",name:"柳智宇：佛学与心理学的结合",desc:"这一段是把前面三段的西方框架放回中国文化语境里看，重点在「如何结合」而不是「谁更高」。",
+     lessons:[
+      {id:"psy-401",title:"佛学与心理学的边界：一个写系统，一个改 bug",
+       points:["柳智宇的核心判断：两者关心的都是人的心，但跨度不同——佛学关心更长远的生命跨度，心理学关心当下困惑的解决，正好互补","他用的方法是「现象学还原」：不急于在概念层面比较佛法和心理学是否相同，而是把概念都还原到体验本身去看它在说什么、如何发生","对焦虑的观察：普遍的焦虑由学校传给家庭、再由家庭传给孩子；家长要当「防火墙」涵容孩子的情绪，而不是当高压锅持续加压","他明确反对把本质当实体：空性也只是人类建构的一种视角，不是先验的第一因","对现代人心理特点，他推荐一行禅师（法国梅村）的路径，认为更适配"],
+       concepts:[{t:"现象学还原",d:"把概念（无论来自佛法还是心理学）还原到具体的体验与发生过程，再比较——避免在概念层面做肤浅的等同或对立。"},{t:"涵容",d:"家长承接住孩子情绪的能力，像容器一样容纳而不立刻反弹回去，是他反复强调的父母核心功能。"}],
+       links:[{t:"凤凰网科技：对话柳智宇——「人间越珍贵的东西就越脆弱」",u:"https://tech.ifeng.com/c/8ZbYTnhX06W"}]},
+      {id:"psy-402",title:"出家者说：戒律、自由与心的训练",
+       points:["他理解的自由不是「想做什么就做什么」，而是「能自由地使用自己的心」——心念受厨师、过往积累、拖延惯性影响，人常常控制不住自己","佛法里的戒律和对人的要求，目的是训练心，不是束缚身体；初学时容易把握不住这一点而表现得拘谨教条（他自己有过「对面包起贪心所以不能买」的阶段）","「随众」：在团体中大家干什么你就干什么，做现实上的妥协与适应","但人不能被社会角色绑架，要始终保持独立思考与自我批判——思想自由才能心灵自由","寺院作息实录：4 点起床、4:30 早殿、上午 8–11 点与下午 2–4:15 工作学习、晚间上课、21:20 打板休息"],
+       concepts:[{t:"随众",d:"在不违背原则的前提下随顺团体的作息与规范，是修行也是社会适应的训练。"},{t:"心的自由",d:"他区分的两种自由：外在行为自由 vs 内在心念的可控性。心理学的用武之地正在后者。"}],
+       links:[{t:"柳智宇：出家者说（一）",u:"https://ishare.ifeng.com/c/s/v002AZMlFdIUr9EKcBnIHKyTgMwoDNzBky-_2jJ75579WpPk__"},{t:"柳智宇：出家者说（二）",u:"https://www.sohu.com/a/242349817_488913"}]},
+      {id:"psy-403",title:"融通实践：东方传统文化 + 西方心理学的本土化路径",
+       points:["他 2017 年底考取三级心理咨询师执照，早期做过微信文字形式的「佛系心理咨询」，每次 1 小时","还俗后创办「华夏心苑」，定位是推进东方传统文化与西方心理学的融通，搭建咨询师培养的闭环生态","工作原则：不追求概念上的统一，而是把两者都还原到现象，然后按来访者的实际需要取用","产品线包括生命成长系列课程、正念禅修营、心理咨询、心音热线、学习力咨询","对自学者最实用的一点：先把一个具体困扰（如焦虑、亲子冲突）作为切入口，再决定用哪套工具，而不是先选体系再找问题"],
+       concepts:[{t:"本土心理学",d:"把中国文化的经验与语言纳入心理咨询，避免直接套用西方个体主义框架时的水土不服。"},{t:"正念禅修营",d:"他主推的落地形式，把佛教的觉察训练以去宗教化的方式转成心理练习。"}],
+       links:[{t:"柳智宇工作室官网（课程与咨询体系）",u:"https://liuzhiyugzs.com"}]}
+     ]}
+  ],
+
+  /* ---------- 3. 网球学习路径（永久保留） ---------- */
+  tennis: [
+    {id:"tn1",name:"基础装备与规则",desc:"先把花钱和规则搞清楚，避免还没上手就被装备和计分劝退。",
+     lessons:[
+      {id:"ten-101",title:"装备：球拍、球鞋与球的选购要点",
+       points:["球拍：初学者选拍面 100–110 平方英寸、重量 270–300 克（9–10.5 oz）、平衡适中。拍面越大甜区越大、容错越高","先买已穿好线的球拍，等打过几个月再考虑换线和升级","球鞋比球拍更值得先花钱：网球是急停急转的运动，跑鞋的鞋底在硬地上容易翻，专业网球鞋提供侧向支撑","其他：吸汗带、避震器、至少一打球；初学可用红/橙/绿低压缩球，弹跳慢、更好控制","握把尺寸要合手，太粗太细都容易导致手腕代偿"],
+       mistakes:["一开始就买职业选手的重拍：挥不动，动作会变形，还容易伤肘","穿跑鞋上场：横向移动时脚踝风险明显上升","忽视握把尺寸，用「大力握紧」来补救，结果手腕先累"],
+       links:[{t:"网球入门完全指南（装备选择）",u:"http://wangqurumen.com.cn/"},{t:"人民网·科普中国：网球怎么练？这份指南送给初学者",u:"https://kpzg.people.com.cn/BIG5/n1/2025/0710/c404214-40518426.html"}]},
+      {id:"ten-102",title:"规则与计分：15/30/40、deuce、发球与出界",
+       points:["场地：单打 8.23m 宽、23.77m 长；双打 10.97m 宽。压线算界内","计分：love（0）→ 15 → 30 → 40 → 一局；双方 40 平为 deuce，需连赢两分","先到 6 局且净胜两局赢一盘；6–6 通常打抢七（先到 7 分且净胜两分）","发球：站在底线后，对角发进对方发球区，有两次机会；两次都失误是双误，直接丢分","发球擦网但仍落在正确区内判 let，重发；发球过程中踩线或走动是脚误","回合中球在自己这边只能落地一次，必须在第二次落地前回过去；未落地就击球叫截击"],
+       mistakes:["发球踩底线（脚误）自己没意识到，被对手提醒还觉得是对方挑刺","把 deuce 当成「再赢一分就赢」，实际上必须净胜两分","习惯性在对手发球时站着不动，不做分腿垫步"],
+       links:[{t:"Tennis for Beginners: How to Start Playing（含 ITF 规则白话版）",u:"https://www.breakers-tennis.com/blog/tennis-for-beginners-guide"},{t:"网球入门完全指南（规则与计分）",u:"http://wangqurumen.com.cn/"}]}
+     ]},
+    {id:"tn2",name:"握拍与准备姿势",desc:"这两件事决定你后面每一个球的质量，练得再久也值得反复回来看。",
+     lessons:[
+      {id:"ten-201",title:"四种握拍与准备姿势、分腿垫步",
+       points:["大陆式：像握菜刀或锤子，通用性最强，发球、双手反拍、切削、截击都用得上，建议先从这个找感觉","东方式正手：适合初学正手；半西方式在底线能兼顾力量与上旋，进阶后常用","西方式：上旋更强，但对时机要求高，初学不建议","准备姿势：双脚略宽于肩、膝盖微屈、上体微前倾、重心落在前脚掌——像重心前倾的蹲马步","非持拍手轻托拍喉，拍头高于拍柄，两手在肚脐前方，两肘放松","分腿垫步：在对手触球瞬间做一个小跳，双脚分开落地；不是向上跳，是重心重置"],
+       mistakes:["站得太直、脚跟踏实——启动时会慢半拍，这是初学者最常见的通病","握拍过紧，整条手臂僵硬，力量传导断在手腕","分腿垫步做成「原地蹦高」，反而失去向侧向启动的能力"],
+       links:[{t:"人民网·科普中国：网球怎么练（球感与规范动作）",u:"https://kpzg.people.com.cn/BIG5/n1/2025/0710/c404214-40518426.html"},{t:"网球部分技术动作要领（基础准备与步法）",u:"http://mp.weixin.qq.com/s?__biz=MzUzOTA4MzY2Nw==&mid=2247497213&idx=1&sn=fa569fd253c33de0d364a8cbbcee1682&chksm=fb5c019e1a63aa61e2f2ef313e31f1744eb8e1e28886fe578cfd389b1ceb652bf31415306c5a#rd"}]}
+     ]},
+    {id:"tn3",name:"正手击球",desc:"一场比赛里接近 70% 的球会用正手打，先把这一拍打稳。",
+     lessons:[
+      {id:"ten-301",title:"正手：侧身引拍 → 击球 → 随挥三步",
+       points:["侧身引拍：判断来球在正手侧，立即向右转体，同时上左脚或撤右脚；拍柄底盖指向来球、拍头指向后挡网，左臂向侧前伸直指向来球","站位：初学用关闭式（左脚前右脚后，两脚连线垂直底线）更容易完成转体","击球：向前挥拍前把拍头降到低于来球的高度，蹬腿转腰向前向上挥；击球点在身体侧前方、腰的高度","动力链顺序：踝 → 膝 → 髋 → 肩 → 肘 → 腕 → 球拍；手臂相对放松，用腿腰肩带","触球瞬间拍面垂直地面或上框略前压，手腕固定","随挥：收于左肩上方或左肩侧；完整与否的判断标准——肚脐、右肘、拍柄底盖都朝前"],
+       mistakes:["只用手臂挥拍，腿和腰不动，力量全靠肩膀硬顶，容易伤肩","击球点太后（在身体侧面甚至身后），球容易下网或飞出场外","没有随挥，打到球就停，球的深度和方向都失控","眼睛没盯球，抬头看对手或看落点，导致打不准甜区"],
+       links:[{t:"四川川投国际网球中心：网球系列丨正手击球",u:"https://www.sciitc.com/news/venue-news/325.html"},{t:"ITF 一级教练讲正手击球（动作构成拆解）",u:"https://www.ijiaolian.com/peixunDetail/7591"}]}
+     ]},
+    {id:"tn4",name:"反手击球",desc:"先学双手反拍，稳定优先；切削作为过渡和变化。",
+     lessons:[
+      {id:"ten-401",title:"双手反拍与反手切削",
+       points:["初学直接上双手反拍：想象用左手打正手，右手负责稳定和控方向","握拍：主导手用大陆式或东方式反手，非主导手用东方式正手","引拍要比正手更早，肩膀几乎完全背对球网，双臂自然弯曲收在身体一侧","击球点比正手更靠前，确保有发力空间；非主导手提供主要推力","随挥轨迹由低到高充分前送，结束时拍头到右肩上方，身体完全打开面向球网","切削用大陆式握拍：引拍较高、拍面稍打开，从上往下向前切球的后下部，动作短促"],
+       mistakes:["单手反拍初学就上，肘部承受不住来球冲击，容易网球肘","双手反拍变成两只手各使各的劲，缺少主导手控方向","切削时手腕松、拍面角度乱飘，球要么下网要么飘高"],
+       links:[{t:"网球部分技术动作要领（反手与削球）",u:"http://mp.weixin.qq.com/s?__biz=MzUzOTA4MzY2Nw==&mid=2247497213&idx=1&sn=fa569fd253c33de0d364a8cbbcee1682&chksm=fb5c019e1a63aa61e2f2ef313e31f1744eb8e1e28886fe578cfd389b1ceb652bf31415306c5a#rd"},{t:"人民网·科普中国：反手基本击球",u:"https://kpzg.people.com.cn/BIG5/n1/2025/0710/c404214-40518426.html"}]}
+     ]},
+    {id:"tn5",name:"发球",desc:"网球里唯一完全由自己控制的技术，也是最复杂的一拍，慢练比大力更重要。",
+     lessons:[
+      {id:"ten-501",title:"发球：抛球、奖杯姿势与内旋",
+       points:["抛球是发球的生命线。标准高度：把球拍垂直举高，再高一点就是你的抛球高度","抛球点：平击发球在身体前上方；上旋/侧旋在头顶或稍偏左（右手持拍）；一般往场内抛一点","抛球手伸直上抬，另一只手 90 度向后张开，屈腿、蹬地、伸直手臂在最高点击球","抛球后持拍臂下垂、屈肘形成「搔背」动作，身体像拉开的弓","力量来源是前臂内旋，不是手腕甩；击球时身体向上向前，重心跟进场内","击球后手臂自然挥到身体另一侧，抛球手可做环绕腹部的动作，避免被球拍打到"],
+       mistakes:["抛球忽高忽低：这是发球不稳的头号原因，比挥拍动作重要得多","抛球手弯曲或用手腕甩球，导致球带旋转、落点飘","为了发力去跳跃而不是蹬地，落地失衡，第二拍接不上","击球点太低，在肩膀高度就打，球多半下网"],
+       links:[{t:"网球初学者入门技巧（发球/高压/截击）",u:"http://epaper.01ny.cn/http_rb/html/2019-02/22/content_631500.htm"},{t:"网球部分技术动作要领（发球与接发球）",u:"http://mp.weixin.qq.com/s?__biz=MzUzOTA4MzY2Nw==&mid=2247497213&idx=1&sn=fa569fd253c33de0d364a8cbbcee1682&chksm=fb5c019e1a63aa61e2f2ef313e31f1744eb8e1e28886fe578cfd389b1ceb652bf31415306c5a#rd"}]}
+     ]},
+    {id:"tn6",name:"接发球",desc:"接发的目标不是制胜分，是把球回过去、回得深。",
+     lessons:[
+      {id:"ten-601",title:"接发球：短引拍、借力、回深区",
+       points:["站位在底线后一步，重心降低，注意力集中","引拍要短小紧凑：来球速度快，没有时间做大引拍，靠转体和小幅后引即可","向前迎击、借来球的力量，拍面控制好确保过网","战术目标：先保证过网并回到对方深区，再谈角度和进攻","对手一发和二发要区别对待：二发可以站进来一点、主动加压"],
+       mistakes:["用底线相持的引拍幅度去接发球，来不及，经常被球顶到拍框","想着一拍打死，结果失误率极高","接完发球站在原地看，没有立刻回中路准备下一拍"],
+       links:[{t:"网球部分技术动作要领（接发球）",u:"http://mp.weixin.qq.com/s?__biz=MzUzOTA4MzY2Nw==&mid=2247497213&idx=1&sn=fa569fd253c33de0d364a8cbbcee1682&chksm=fb5c019e1a63aa61e2f2ef313e31f1744eb8e1e28886fe578cfd389b1ceb652bf31415306c5a#rd"},{t:"Tennis for Beginners（接发与回合规则）",u:"https://www.breakers-tennis.com/blog/tennis-for-beginners-guide"}]}
+     ]},
+    {id:"tn7",name:"网前截击与高压球",desc:"网前是「挡」不是「挥」，改掉这个认知就能少走很多弯路。",
+     lessons:[
+      {id:"ten-701",title:"截击、高压球与放小球",
+       points:["截击用大陆式握拍，举拍在身前、拍头高于手腕","动作是 punch（挡击）而不是挥拍：以肩为轴向前下方短促顶球，手腕固定像一堵墙","步法：永远用非持拍手一侧的脚向前上步，关闭站位，减小受击面积","上网站位时机：对方回球浅、或你把球削深到对方底线后随球上网","高压球：不持拍手始终指着球追踪下落，用小碎步调整到身体前上方击球；重点是角度不是力量","放小球：准备动作要和普通击球一样，最后一刻才改变，拍面打开做向下向后的缓冲"],
+       mistakes:["弯着腰去够球截击——应该屈腿但腰背挺直，脚尖着地，像跳绳一样用小碎步摩擦地面","在网前做大挥拍，动作来不及，球打到拍框","面对高球正对着球仰身后退，一定要用交叉步指着球往后退"],
+       links:[{t:"网球初学者入门技巧（网前截击与高压球）",u:"http://epaper.01ny.cn/http_rb/html/2019-02/22/content_631500.htm"},{t:"体育小知识——网球篇（截击常见误区）",u:"https://www.sohu.com/a/286697555_99894383"}]}
+     ]},
+    {id:"tn8",name:"步法与体能",desc:"有统计说网球约 70% 的失误源于步法。这一阶段决定你的上限。",
+     lessons:[
+      {id:"ten-801",title:"步法、体能与伤病预防",
+       points:["三种基本步法：滑步（中小范围）、交叉步（大范围横向）、小碎步（最后微调到最佳击球点）","原则：尽早移动，用大步到位、小碎步微调，保证击球时身体平衡可控","每球结束后回中路并重新分腿垫步，再准备下一拍","体能构成：8 分钟动态热身 → 技术练习 → 对打 → 体能 → 拉伸；每周 2–3 次、每次 60–90 分钟","力量补充（每周 2 次，15–20 分钟）：分腿蹲、侧向弹力带行走、平板支撑、肩部轻阻力旋转","打完做小腿/腘绳肌/前臂的放松与补水"],
+       mistakes:["到位后就站着不动等球，少了最后的小碎步，击球点总是差一点","击完球不回中路，被对手调动到反方向","不做热身直接上场，肩肘和脚踝最容易出问题"],
+       links:[{t:"网球入门完全指南（步法训练与训练计划）",u:"http://wangqurumen.com.cn/"},{t:"How to Start Playing Tennis（4 周计划 + 体能）",u:"https://goldenracketacademy.com?p=3186/"}]}
+     ]},
+    {id:"tn9",name:"实战策略",desc:"技术够用之后，赢球靠的是降低自己的失误率和打对手不舒服的地方。",
+     lessons:[
+      {id:"ten-901",title:"单打策略、双打配合与比赛礼仪",
+       points:["初学者第一目标：把球留在界内。能连续对拉十拍，比十次失误里蒙一记制胜分有价值得多","先追求深度和过网高度（加安全余量），再追求角度和速度","常见套路：发球 + 第一拍打向对方弱侧；对方回球浅时上前压迫","打对手的反手、打对角深球、把球送到对手移动的反方向，是三条最稳的策略","挑高球：防守时用削球动作由下向上把球挑高争取回位；进攻时伪装成平击、最后一刻向上刷出强上旋","业余比赛没有裁判，自己这侧的线自己判；不确定时给对手有利判定","不要在比分进行中从球场后面穿过，捡到别人的球要礼貌送回"],
+       mistakes:["一上来就追制胜分，非受迫性失误主导整场","整场只打一种落点，让对手站定了打","对场地线和判罚争对错，把一场社交球的气氛搞坏"],
+       links:[{t:"Tennis for Beginners（战术、礼仪与判线）",u:"https://www.breakers-tennis.com/blog/tennis-for-beginners-guide"},{t:"Essential Tennis（免费系统课程）",u:"https://essentialtennis.com/"}]}
+     ]}
+  ],
+
+  /* ---------- 4. 亲子育儿（永久保留） ---------- */
+  parent: [
+    {id:"pa-01",date:"2026-10-21",source:"科普中国",
+     title:"情绪回收站：不良情绪如何化解",
+     summary:"把家庭做成一个「情绪回收站」的完整方法。沟通上给三个可替换的句式：把质问换成好奇（「今天又惹什么事了」→「今天有什么开心的事吗」）、把讲道理换成共情（「听起来你真的很难受」胜过十句「你应该」）、把训话换成每天睡前 10 分钟不谈学习的专属聊天。还给了情绪调节三件套的具体量：学龄儿童睡 9–12 小时、青少年 8–10 小时；每天累计至少 60 分钟中高强度活动；不省早餐、限高糖。最后列出需要专业介入的四个信号。",
+     url:"https://www.kepuchina.cn/article/articleinfo?ar_id=740075&business_type=100&classify=0"},
+    {id:"pa-02",date:"2026-10-21",source:"人民网·教育频道",
+     title:"预防「心灵之殇」：亲子冲突时如何有效沟通",
+     summary:"一套五步流程，适合用在孩子有负面情绪时。①觉察：先承认自己生气了，深呼吸（吸气—屏息 3 秒—呼气），体验身体反应，等平静下来再开口。②建立联结：带着微笑问「发生什么事情了？还有吗？还有吗……」，全程不评判。③倾听并说出孩子行为下面的感受和需要，顺序是描述事实 + 表达感受 + 表达需要 + 表达期待。④再表达自己的感受需要。⑤把选择权交给孩子，引导他思考后果并承担责任。核心提醒：关系先于教育，没建立联结就讲道理基本无效。",
+     url:"https://edu.people.com.cn/BIG5/n1/2018/1215/c1053-30468634.html"},
+    {id:"pa-03",date:"2026-10-21",source:"人民日报全国党媒平台",
+     title:"从「鸡飞狗跳」到「母慈子孝」：湘雅二院精神科主任医师的四招",
+     summary:"中南大学湘雅二医院李卫晖教授给出的一组具体做法：一是共情先行，把「你今天怎么又拉着脸」换成「我感觉到你最近心情不太好，愿意聊聊吗」，从「你」开头改成「我感受」开头；二是半开放式提问替代命令，「你觉得我们可以一起做点什么来调整」；三是鼓励要具体到行为，不说「你真棒」而说「你这篇作文结构清晰，用了好几个生动的比喻」；四是孩子情绪爆发时做稳定的「情绪容器」。背景数据：青少年抑郁问题中约 60%–70% 与人际压力相关，亲子冲突是首要来源。",
+     url:"https://www.hubpd.com/detail/index.html?contentId=2594073385369873122&appKey=5fe15530cb852f00015ce437&key=5fe15530cb852f00015ce438&topId=&interruptId=0"},
+    {id:"pa-04",date:"2026-10-21",source:"人民网·健康频道",
+     title:"学会倾听多用描述：亲子沟通要避的三个「盲区」",
+     summary:"首都师范大学李文道副教授的两组方法。听：停下手里的事、身体前倾、保持眼神接触，观察表情肢体，简短提问鼓励他说完，最后将心比心共情——只有先「通情」，后面的「达理」孩子才听得进去。说：用描述式表扬替代评价式表扬，三步是描述所见（地板很干净、书摆得很整齐）→ 描述自己的感受（走进你房间感觉很舒服）→ 把行为总结成一个词（这叫有条理）。批评同理，用描述式批评替代「你长脑袋了吗」这类评价式批评。文中也说明内疚感是道德认知的重要情绪基础，批评不可省。",
+     url:"https://health.people.com.cn/n1/2016/0301/c21471-28160450.html"},
+    {id:"pa-05",date:"2026-10-21",source:"人民网·教育频道",
+     title:"把改进成长权交给孩子，亲子关系更融洽",
+     summary:"中国人民大学韦庆旺等研究者的方法：孩子闹脾气时先控制自己情绪，问清原因——孩子感到被接纳，问题已经解决一半；然后不给结论，而是提供几种解决办法让他选，用「选择题」代替「判断题」，把改进权交给孩子。另一条是言传身教：与其把家当纯休闲场所，不如明确表达「爸爸妈妈在工作，这很重要，所以我不能陪你玩」，孩子会潜移默化意识到彼此是独立个体。惩罚观：可以惩罚但要配合包容与鼓励，让孩子知道被惩罚也仍被爱；也有专家建议「生动地表扬，严肃地批评，谨慎地惩罚」。",
+     url:"https://edu.people.com.cn/n1/2022/1227/c1006-32594425.html"},
+    {id:"pa-06",date:"2026-10-21",source:"人民日报",
+     title:"只要妈妈在，孩子就不乖？背后的婴幼儿心理学",
+     summary:"用经典的「视崖实验」解释这个现象：1 岁宝宝在人工悬崖边会看妈妈的表情决定要不要爬过去——妈妈高兴就爬，妈妈生气或害怕就拒绝。这就是「社会性参照」：妈妈是宝宝判断环境安全与否的参照对象。所以妈妈不在时宝宝会谨慎当乖宝宝，妈妈一出现就恃宠而骄，恰恰说明他信任你。可以做的是：不采取打骂冷落推开他；回来时先满足地抱抱陪玩；要离开时提前说清去哪、什么时候回。研究提示小时候更粘人的孩子，成年后应对压力的能力反而更强。",
+     url:"https://www.peopleapp.com/rmharticle/30027662386"},
+    {id:"pa-07",date:"2026-10-22",source:"科普中国",
+     title:"先接住情绪，再解决问题：五步沟通搭建亲子信任桥梁",
+     summary:"湖南省第二人民医院朱薇薇医生给出的五步沟通法，孩子带委屈回家时用：①专注倾听还原事实，不打断不评判；②帮孩子命名情绪（「听起来你特别委屈，是吗」），忌说「这点小事有什么好哭的」；③换位表达共鸣；④看见付出、肯定努力；⑤联结建立后再问「你希望我怎么帮你」。原理：12 岁以下孩子负责理性调控的前额叶未发育成熟，情绪被接纳后大脑才能从「情绪脑」切到「理性脑」，建议才真正听得进。还附了 3–6 岁、7–12 岁的分龄要点。",
+     url:"https://www.kepuchina.cn/article/articleinfo?ar_id=721997&business_type=100&classify=0"},
+    {id:"pa-08",date:"2026-10-22",source:"科普中国",
+     title:"放下「盯紧」，用理解托底：孩子成长的核心是被看见",
+     summary:"针对「越盯作业越叛逆」的恶性循环：自我决定理论指出人的行为受自主、胜任、归属三大心理需求驱动，「盯紧」式教育恰恰剥夺前两项，把学习变成「家长的任务」。文中给出替代方案：「接住情绪」五步（专注陪伴、帮孩子命名情绪、允许表达并设边界、身体安抚、事后复盘）；高质量陪伴三层——每天预留 15 分钟专属时间、学习上做引导者拆分任务并及时肯定、用约定替代强制；允许孩子有疲惫走神的瞬间，那是压力的正常调节，也是成长型思维的基础。",
+     url:"https://www.kepuchina.cn/article/articleinfo?ar_id=699506&business_type=100&classify=0"}
+  ],
+
+  /* ---------- 5. 投资理财（永久保留） ---------- */
+  invest: [
+    {id:"iv-01",date:"2026-10-21",source:"且慢",
+     title:"什么是基金定投？优势与适合人群",
+     summary:"把定投讲清楚的入门文：定期定额买固定基金，不用择时。获利机制是平均成本法摊低成本加长期复利。三条优势：用纪律换投资空间、避免追涨杀跌、分期投入分摊风险。适合四类人——没时间没专业知识、怕波动又想有收益、容易被市场情绪带着走、每月有固定薪资。同时也说清局限：定投是中长期理财方式，不是快速致富工具。",
+     url:"https://content.qieman.com/n/content/article?articleId=2017"},
+    {id:"iv-02",date:"2026-10-21",source:"银行螺丝钉",
+     title:"定投基金，怎么才能赚钱？",
+     summary:"理论上只有一句：低估买入、正常估值持有、高估卖出。但拦住大多数人的是三道心理关——刚投就浮亏要不要继续、刚回本就想出、涨了舍不得卖。作者复盘出三条能真正走完一个完整周期的经验：①用每月新增的闲钱投，不动存量，雪球才不会中途散掉；②选符合自己风险承受能力的品种，波动从小到大依次是价值风格指数＜宽基指数＜成长/行业主题指数；③减少看盘减少操作，把买卖规则写在纸面上约束自己。",
+     url:"https://news.html5.qq.com/v1/article?ch=999892&docId=5128820194928447810&showAttach=0&tabId=0&tagId=0"},
+    {id:"iv-03",date:"2026-10-21",source:"雪球",
+     title:"银行螺丝钉《做一个佛系定投者》",
+     summary:"「微笑曲线」的完整解释：下跌时坚持定投，相同金额买到更多份额、摊低平均成本，所以品种不必涨回原点就已盈利。文中给了实算对比——某年沪深 300 下跌约 22%，定期定额定投的浮亏约 11%；改用「定期不定额」（估值越低投得越多）后浮亏降到约 9%，长期每年约提升 2%–3% 收益。关键提醒：微笑效应来自分批投入，且只对长期向上的宽基指数成立，选错标的会变成哭泣曲线。",
+     url:"https://xueqiu.com/1520462719/136658129"},
+    {id:"iv-04",date:"2026-10-21",source:"雪球",
+     title:"《定投十年财务自由》读书笔记：普通人的财富路径",
+     summary:"书里最务实的一个定义：财务自由 = 被动收入 ≥ 日常开支，不是暴富。配套的 4% 法则——所需总资产 = 年度日常开销 ÷ 4%，一年花 10 万，约 250 万可投资资产就能获得低压力的选择权。为什么普通人适合宽基指数基金而不是个股：指数具备自我更新能力，长期向上；个股可能归零。文中也把微笑曲线拆成左侧下跌、底部磨底、右侧上涨三段，指出大多数人亏在左侧的恐惧、暂停和割肉上。",
+     url:"https://www.xueqiu.com/4492324713/412347920"},
+    {id:"iv-05",date:"2026-10-21",source:"小宇宙·无人知晓",
+     title:"E09 孟岩对话黄海：让更多人知道你，还是让爱你的人更爱你",
+     summary:"这期表面讲品牌，实际讲的是长期主义和「不做短期 ROI 优化」的决策观，对投资心态帮助很大。孟岩列出他喜欢的企业共性：不打广告、扩张用直销而非加盟、把员工称为伙伴。嘉宾黄海从投资视角讲一级市场如何判断「待实现价值」的可能性。延伸内容里也谈了效率型公司 vs 体验型公司的差别。适合在想频繁操作、想追热点的时候听一遍。",
+     url:"https://xiaoyuzhoufm.com/episode/61dbf5b519e8465da2f8f4fd"},
+    {id:"iv-06",date:"2026-10-21",source:"且慢·认真的天马",
+     title:"自己的钱该怎么投：先判断「有没有闲钱」，再判断「能扛多大波动」",
+     summary:"给了一套普通人能照着做的选择顺序。第一步算闲钱：把日常生活费和三年内确定要花的钱扣掉，剩下的才配叫闲钱——同样年薪 20 万，一线城市和三线城市能投的品种完全不同。第二步测波动承受力：股票基金波动约 50%，债券基金约 5%，中间靠调整股债比例来凑。文中给了「能承受 10% 回撤就配 10% 股票 + 90% 债券」这类对照表，比看收益率选产品靠谱得多。",
+     url:"https://content.qieman.com/content/article?articleId=3661"},
+    {id:"iv-07",date:"2026-10-21",source:"中国基金报",
+     title:"「四笔钱」资产配置：不是选产品，是先把钱分类",
+     summary:"解释了为什么「一只产品打天下」行不通：金融产品有不可能三角，收益性、风险性、流动性三者不可兼得，只能让不同时间属性的钱去匹配不同风险的产品。四笔钱分别是活钱管理（随时要用，求流动）、稳健理财（半年到三年有具体用途，求不亏）、长期投资（三五年以上不动，可承受高波动）、保险保障（给生活托底，避免风险来时被迫割肉离场）。先分钱再选品，是这套方法最值得记的部分。",
+     url:"https://app-web.chnfund.com/YHHEediting/202304/t20230418_4185008.html"},
+    {id:"iv-08",date:"2026-10-21",source:"有知有行",
+     title:"定投与资产配置孰优孰劣，初学者该如何选择",
+     summary:"把两种主流入门路径的优缺点摆在同一张桌子上对比。定投的好处是每月增量资金分批进场、心理负担小，缺点是手里已有一笔钱时不知道该分多少份投完，分少了买在山顶、分多了底部买不够。一次性资产配置的好处是合理配置后中长期年化 10% 左右就能跑赢七成主动投资人，缺点是可能一布局完就遇上大跌。结论是两者要结合：有机会时多投、没机会时把结余留着。适合在你决定「到底怎么开始」之前读。",
+     url:"https://youzhiyouxing.cn/materials/1145"},
+    {id:"iv-09",date:"2026-10-22",source:"且慢",
+     title:"指数估值时，需要注意什么？",
+     summary:"买指数基金绕不开「现在贵不贵」，这篇把估值表的原理讲透：常用的 PE/PB 历史分位数（如沪深 300 处于过去 8 年 88% 分位）本质是归纳法——基于历史统计，直观、大部分时候靠谱，但遇到重大逻辑变化会失效；而「优质资产长期向上」是演绎法，基于因果推理。文章用「太阳东升西落」的例子把两种思维的区别讲得很清楚。提醒：别把「过去十年没出事」当成「永远安全」，归纳和演绎要结合着用。",
+     url:"https://content.qieman.com/content/article?articleId=3995"},
+    {id:"iv-10",date:"2026-10-22",source:"有知有行",
+     title:"定投专题（三）：买得好不如卖得好？",
+     summary:"定投最难的一环其实是「怎么卖」。文中用 2010–2015 年定投沪深 300 实测：设 10%、30%、50% 目标收益止盈的三种方案，全部在牛市早期提前下车，放弃的收益相当可观；目标估值法同样难在设值（沪深 300 那轮最高只到 74°，按 80° 设就彻底错过）。更可行的是估值分档＋分批卖出，弱化单点判断的重要性。核心观点：卖得好的关键是想办法把牛市收益留住，而不是锁定一个小目标。",
+     url:"https://youzhiyouxing.cn/materials/888"}
+  ],
+
+  /* ---------- 6. 播客（永久保留） ---------- */
+  podcast: {
+    like: [
+      {id:"po-01",host:"孟岩（有知有行创始人）",title:"无人知晓",
+       summary:"孟岩主理的对话类播客，更新频率和嘉宾都不固定，正如名字。内容从投资、创作到如何面对生命的混乱，风格真诚、温和、克制。代表性单集有 E30 让奇迹发生、E37 鱼不存在、E39 对话重轻谈创作。听感接近「一个想明白了的人慢慢说话」，适合独处或做家务时听。",
+       url:"https://xiaoyuzhoufm.com/podcast/611719d3cb0b82e1df0ad29e"},
+      {id:"po-02",host:"携隐Melody",title:"纵横四海",
+       summary:"一档「把一本好书讲透」的节目，单集常在一两小时。覆盖精力管理、营销管理、心理学、决策等主题，讲法是把书里的框架拆成能用的步骤，再配上大量商业案例。适合想读书但读不进去的时候，先听一遍再决定要不要买纸质书。",
+       url:"https://xiaoyuzhoufm.com/podcast/62694abdb221dd5908417d1e"},
+      {id:"po-03",host:"小宇宙编辑部",title:"创造派探索指南（合集）",
+       summary:"一个策展式合集，把关于「创造」的单集串成一条线，其中包括知行小酒馆 E13 专访 flomo 少楠、岩中花述 S7E9 鲁豫对话小帕、展开讲讲对谈《好东西》导演邵艺辉、天真不天真等。如果你已经听知行小酒馆和鲁豫，这个合集等于一份现成的延伸片单，不用自己去翻。",
+       url:"https://collection.xiaoyuzhoufm.com/create"},
+      {id:"po-04",host:"小宇宙编辑部",title:"小宇宙热议 VOL.5（合集）",
+       summary:"编辑部挑出的高讨论度单集合集，含无人知晓 E37 鱼不存在、声东击西关于美国年轻选民的观察、展开讲讲等，每条都附了听众的真实留言。适合当作「最近大家在讨论什么」的入口，比刷榜单更能判断自己会不会喜欢。",
+       url:"https://collection.xiaoyuzhoufm.com/hot5"},
+      {id:"po-05",host:"多位主播",title:"2023 小宇宙播客大赏 · 年度特别推荐单集",
+       summary:"按热议讨论、强烈共鸣、多样议题三个维度选出的年度单集合集，含随机波动、不合时宜、忽左忽右、Talk 三联、过刊、思文败类、张小珺商业访谈录等。覆盖面很广，是快速横向认识中文播客版图的一份清单，可以先扫一遍再挑几个长期订阅。",
+       url:"https://www.xiaoyuzhoufm.com/collection/episode/65a9fca8a578f8e81682d848"}
+    ],
+    widen: [
+      {id:"pw-01",host:"泓君（硅谷101）",title:"硅谷101",
+       summary:"硬科技与商业向的深度访谈，议题覆盖 AI、半导体、航天、气候与地缘对供应链的影响。节目会请到一线从业者把技术细节讲成人话，例如对话 SpaceX 前高管谈火星计划。风格是记者式的追问，与人文对谈的流动感完全不同。",
+       why:"你常听的是人文对谈，这档是硬科技。它能把「AI与一人公司」栏目里那些抽象概念接回真实产业，听几期之后对 AI 的判断会具体很多。",
+       url:"https://xiaoyuzhoufm.com/podcast/5e5c52c9418a84a04625e6cc"},
+      {id:"pw-02",host:"张小珺",title:"张小珺Jùn | 商业访谈录",
+       summary:"前《财经》杂志与腾讯新闻的深度报道记者，两届亚洲卓越报道奖（SOPA）得主。节目做中国科技与商业的长访谈，对象是创业者、投资人和大厂关键人物，单集常在一两小时，信息密度很高，近期大量内容围绕 AI 模型、Agent 与创业组织形态。",
+       why:"这是一档「记者视角」的商业访谈，讲究事实和交叉验证，不煽情。和你常听的对谈类相比，它更像在给你补一手材料，而不是陪你聊天。",
+       url:"https://xiaoyuzhoufm.com/podcast/626b46ea9cbbf0451cf5a962"},
+      {id:"pw-03",host:"声动活泼",title:"声动早咖啡",
+       summary:"每个工作日的早晨更新，15 分钟讲清楚几条与日常生活相关的商业科技动态，比如京沪高铁为什么降价、新百伦为什么起诉迪卡侬、手机厂商为什么加码智能体。短、密、不拖沓，听完不需要再去看新闻。",
+       why:"15 分钟一集，正好是早上洗漱做早饭的长度。它的价值是把商业新闻讲成「和我有关」，与你每天看的要闻刚好互补。",
+       url:"https://www.xiaoyuzhoufm.com/podcast/60de7c003dd577b40d5a40f3"},
+      {id:"pw-04",host:"小宇宙编辑部",title:"跨领域入口：从这份年度单集合集里挑冷门",
+       summary:"同一份年度推荐合集，但建议换个用法——专门挑你平时绝不会点的那几类：忽左忽右 282 基辅无战事（战争亲历）、Talk 三联 EP89 历时七年报道吴谢宇案（深度报道）、剧谈社 Vol.53 从王维杜甫到白居易苏东坡（古典文学）、Vibration 歪波音室讲宝岛流行音乐史（音乐史）。",
+       why:"这份合集里历史、深度报道、古典文学、音乐史都在，而且都是口碑单集。每期只挑一条听，是成本最低的「故意拓宽」方式。",
+       url:"https://www.xiaoyuzhoufm.com/collection/episode/65a9fca8a578f8e81682d848"}
+    ]
+  },
+
+  /* ---------- 7. 书籍（永久保留） ---------- */
+  book: [
+    {name:"心理与成长",items:[
+      {id:"bk-01",author:"马歇尔·卢森堡",title:"非暴力沟通",
+       summary:"提出一套四步沟通框架：观察行为 → 体会感受 → 发现需要 → 提出请求。无论表达自己还是倾听他人都适用，根基在于尊重并体察彼此的需要，再提出建设性方案。适合：容易被沟通卡住的人、亲子与亲密关系场景；也和「亲子育儿」栏目的方法可以直接互证。豆瓣 8.4（修订版 8.6）。",
+       url:"https://m.douban.com/book/subject/3533221"},
+      {id:"bk-02",author:"丹尼尔·卡尼曼",title:"思考，快与慢",
+       summary:"诺贝尔经济学奖得主把人的判断拆成两套系统：快系统凭直觉、慢系统需费力计算，并系统列出锚定效应、可得性偏差、过度自信、损失厌恶等偏差。适合：想理解自己为什么会做错误决定的人。读法建议：先看第二部分（启发法与偏差），和「投资理财」栏目对照读收获最大。豆瓣 8.0。",
+       url:"https://m.douban.com/book/subject/10785583"},
+      {id:"bk-03",author:"维克多·弗兰克尔",title:"活出生命的意义",
+       summary:"作者在集中营的经历之上创立意义疗法，核心主张是：人可以被剥夺一切，唯独选择态度的自由不可剥夺；意义可通过创造、体验和对苦难的态度三条路径获得。适合：处在低谷或觉得日子没方向的人。篇幅不长，可以和心理学的「人本主义」一课一起读。豆瓣 8.5。",
+       url:"https://m.douban.com/book/subject/5330333"}
+    ]},
+    {name:"传统文化经典（建议按 1→5 的顺序读，不要一次全开始）",items:[
+      {id:"bk-04",author:"杨伯峻 译注",title:"【入门 1】论语译注",
+       summary:"公认最稳妥的《论语》入门读本，逐章有注释和白话翻译，不故弄玄虚。建议从「学而」「里仁」读起，不用按顺序通读。适合：想接触儒家但怕原文看不懂的人。读完这本再往下走，后面所有传统经典里的语汇都会顺很多。豆瓣 9.3。",
+       url:"https://m.douban.com/book/subject/4098263"},
+      {id:"bk-05",author:"老子",title:"【入门 2】道德经",
+       summary:"五千言，讲「反者道之动」和「上善若水」这类以退为进的处世观。建议选一个可靠的注译本，每天读一章，不要贪快。适合：心里事多、想把节奏慢下来的人。它和《论语》是两条互补的路——一个教你怎么入世做事，一个教你怎么退一步看。豆瓣 9.5。",
+       url:"https://m.douban.com/book/subject/35461183"},
+      {id:"bk-06",author:"南怀瑾 讲述",title:"【进阶 3】金刚经说什么",
+       summary:"南怀瑾以口语讲解《金刚经》，把般若、「应无所住而生其心」、四句偈等难点讲成现代人能懂的话。核心落在「善护念」——随时照应自己的起心动念。适合：已读过《论语》《道德经》、想进入佛学但不适应经文语感的人。它和心理学栏目的正念一课可以直接对照。豆瓣 9.2。",
+       url:"https://m.douban.com/book/subject/26785340"},
+      {id:"bk-07",author:"禅宗经典",title:"【进阶 4】六祖坛经",
+       summary:"中国化程度最高的佛教经典之一，主张「菩提本无树」的顿悟路径，语言比多数佛经通俗。核心命题：不是要除去念头，而是看清念头的本来。适合：读完《金刚经说什么》想看原典的人。可以和柳智宇那一段的「现象学还原」对照着读——两者都在要求你回到体验本身。豆瓣 9.4。",
+       url:"https://m.douban.com/book/subject/3007708"},
+      {id:"bk-08",author:"王阳明",title:"【进阶 5】传习录",
+       summary:"心学的原典，讲「心即理」「知行合一」「致良知」。与前面几部不同，它强调在事上磨练——知道做不到，其实还是不知道。适合：已经有一定传统经典底子、想把理解落到行动上的人。建议选中华书局全本全注全译本，注释详尽。豆瓣 9.1–9.2。",
+       url:"https://m.douban.com/book/subject/35699260"}
+    ]},
+    {name:"延伸书单",items:[
+      {id:"bk-09",author:"媒体整理",title:"一生必读 28 本书（含豆瓣评分）",
+       summary:"一份覆盖面较广的经典书单，按文学经典、心理成长、认知升级、财富与幸福、中国智慧、心灵慰藉六类列出，每本附豆瓣评分。适合：读完了上面几本之后想找下一本的过渡清单。提醒：书单只作参考，挑一两本真正读进去，比收藏整份清单有用。",
+       url:"https://3g.sina.com.cn/news/detail/5308908987745213.html"}
+    ]}
+  ]
+};
+
+/* ============================================================
+   以下为应用逻辑
+   ============================================================ */
+const TABS = [
+  {k:"ai",     n:"AI与一人公司", s:"AI公司",     ic:"◈"},
+  {k:"psych",  n:"心理学",      s:"心理学",     ic:"◐"},
+  {k:"tennis", n:"网球学习",    s:"网球",       ic:"◎"},
+  {k:"parent", n:"亲子育儿",    s:"育儿",       ic:"♡"},
+  {k:"invest", n:"投资理财",    s:"理财",       ic:"¥"},
+  {k:"podcast",n:"播客",        s:"播客",       ic:"♪"},
+  {k:"book",   n:"书籍",        s:"书籍",       ic:"❏"},
+  {k:"news",   n:"每日新闻",    s:"新闻",       ic:"✦"}
+];
+const TTL = { ai:7, news:3 };
+const LS_FAV = "wb.favs.v1", LS_DONE = "wb.done.v1";
+
+const state = {
+  tab: localStorage.getItem("wb.tab") || "ai",
+  favs: new Set(JSON.parse(localStorage.getItem(LS_FAV) || "[]")),
+  done: new Set(JSON.parse(localStorage.getItem(LS_DONE) || "[]")),
+  q: "",
+  showFav: false
+};
+const save = () => {
+  localStorage.setItem(LS_FAV, JSON.stringify([...state.favs]));
+  localStorage.setItem(LS_DONE, JSON.stringify([...state.done]));
+  localStorage.setItem("wb.tab", state.tab);
+};
+
+/* 建索引：收藏夹反查原始条目 */
+const INDEX = {};
+(function buildIndex(){
+  const add = (o, tab) => { if(o && o.id) INDEX[o.id] = Object.assign({_tab:tab}, o); };
+  ["ai","news","parent","invest"].forEach(t => (DATA[t]||[]).forEach(o => add(o, t)));
+  (DATA.psych||[]).forEach(s => s.lessons.forEach(l => add(l, "psych")));
+  (DATA.tennis||[]).forEach(s => s.lessons.forEach(l => add(l, "tennis")));
+  (DATA.podcast.like||[]).forEach(o => add(o, "podcast"));
+  (DATA.podcast.widen||[]).forEach(o => add(o, "podcast"));
+  (DATA.book||[]).forEach(g => g.items.forEach(o => add(o, "book")));
+})();
+
+/* 工具 */
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const daysAgo = d => Math.floor((Date.now() - new Date(d+"T00:00:00").getTime()) / 86400000);
+function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1600); }
+
+/* 过期过滤 + 降级：全过期则原样展示并提示 */
+function fresh(list, ttl){
+  if(!ttl) return {items:list, stale:false};
+  const ok = list.filter(o => daysAgo(o.date) <= ttl);
+  if(ok.length === 0 && list.length > 0) return {items:list, stale:true};
+  return {items:ok, stale:false};
+}
+function match(o){
+  if(!state.q) return true;
+  const q = state.q.toLowerCase();
+  const s = [o.title, o.summary, o.host, o.author, o.source].filter(Boolean).join(" ").toLowerCase();
+  return s.includes(q);
+}
+function matchLesson(l){
+  if(!state.q) return true;
+  const q = state.q.toLowerCase();
+  const s = [l.title, (l.points||[]).join(" "), (l.mistakes||[]).join(" "),
+             (l.concepts||[]).map(c=>c.t+c.d).join(" ")].join(" ").toLowerCase();
+  return s.includes(q);
+}
+
+/* 卡片 */
+function star(id){ return `<button class="star${state.favs.has(id)?" on":""}" data-fav="${id}">${state.favs.has(id)?"★ 已收藏":"☆ 收藏"}</button>`; }
+function articleCard(o){
+  const bits = [`<span class="tag src">${esc(o.source||"")}</span>`];
+  if(o.date) bits.push(`<span class="tag">${esc(o.date)}</span>`);
+  return `<div class="card">
+    <h3>${esc(o.title)}</h3>
+    <div class="meta">${bits.join("")}</div>
+    <p class="sum">${esc(o.summary)}</p>
+    <div class="row">
+      <a class="linkbtn" href="${esc(o.url)}" target="_blank" rel="noopener">打开原文 ↗</a>
+      ${star(o.id)}
+    </div></div>`;
+}
+function linksHtml(ls){
+  if(!ls || !ls.length) return "";
+  return `<div class="links">${ls.map(l=>`<a href="${esc(l.u)}" target="_blank" rel="noopener"><span class="f">↗</span>${esc(l.t)}</a>`).join("")}</div>`;
+}
+function lessonCard(l, kind, doneCount){
+  const done = state.done.has(l.id);
+  let body = `<ul class="pts">${(l.points||[]).map(p=>`<li>${esc(p)}</li>`).join("")}</ul>`;
+  if(l.concepts && l.concepts.length){
+    body += `<div class="lbl">关键概念</div><dl class="con">${l.concepts.map(c=>`<dt>${esc(c.t)}</dt><dd>${esc(c.d)}</dd>`).join("")}</dl>`;
+  }
+  if(l.mistakes && l.mistakes.length){
+    body += `<div class="lbl warn">易错点</div><ul class="pts">${l.mistakes.map(p=>`<li>${esc(p)}</li>`).join("")}</ul>`;
+  }
+  return `<div class="lesson${done?" done":""}" id="L-${l.id}">
+    <h3>${done?'<span class="ck">✓</span>':''}${esc(l.title)}</h3>
+    ${body}
+    ${linksHtml(l.links)}
+    <div class="lesson-foot">
+      <button class="donebtn${done?" on":""}" data-done="${l.id}">${done?"✓ 已学完":"标记已学"}</button>
+      ${star(l.id)}
+    </div></div>`;
+}
+function progressHtml(stages, tab){
+  const all = stages.flatMap(s => s.lessons);
+  const n = all.filter(l => state.done.has(l.id)).length;
+  const next = all.find(l => !state.done.has(l.id));
+  const pct = all.length ? Math.round(n/all.length*100) : 0;
+  return `<div class="prog">
+    <div class="t">学习进度：<b>${n}</b> / ${all.length} 课${next?`　·　下一课：${esc(next.title)}`:"　·　全部学完 🎉"}</div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    ${next?`<button class="gobtn" data-go="${next.id}">继续学习 →</button>`:""}
+  </div>`;
+}
+function stageHtml(stages, tab){
+  return stages.map((s,i)=>{
+    const ls = s.lessons.filter(matchLesson);
+    if(!ls.length) return "";
+    const dn = s.lessons.filter(l=>state.done.has(l.id)).length;
+    return `<div class="stage">
+      <div class="stage-h"><span class="num">${i+1}</span><h2>${esc(s.name)} <span style="font-weight:400;color:var(--sub);font-size:12px">${dn}/${s.lessons.length}</span></h2></div>
+      <p class="stage-d">${esc(s.desc||"")}</p>
+      ${ls.map(l=>lessonCard(l)).join("")}
+    </div>`;
+  }).join("");
+}
+
+/* 各栏目渲染 */
+const VIEWS = {
+  ai(){
+    const {items, stale} = fresh(DATA.ai, TTL.ai);
+    const list = items.filter(match);
+    return (stale?`<div class="banner">这批内容已超过 7 天未更新，下面是上一次的内容。有新内容后会自动替换。</div>`:"")
+      + (list.length? list.map(articleCard).join("") : `<div class="empty">没有匹配的内容</div>`);
+  },
+  news(){
+    const {items, stale} = fresh(DATA.news, TTL.news);
+    const list = items.filter(match);
+    return (stale?`<div class="banner">新闻已超过 3 天未更新，下面是上一次的内容。</div>`:"")
+      + (list.length? list.map(articleCard).join("") : `<div class="empty">没有匹配的内容</div>`);
+  },
+  parent(){
+    const l = DATA.parent.filter(match);
+    return l.length? l.map(articleCard).join("") : `<div class="empty">没有匹配的内容</div>`;
+  },
+  invest(){
+    const l = DATA.invest.filter(match);
+    return l.length? l.map(articleCard).join("") : `<div class="empty">没有匹配的内容</div>`;
+  },
+  psych(){ return progressHtml(DATA.psych,"psych") + stageHtml(DATA.psych,"psych"); },
+  tennis(){ return progressHtml(DATA.tennis,"tennis") + stageHtml(DATA.tennis,"tennis"); },
+  podcast(){
+    const L = DATA.podcast.like.filter(match), W = DATA.podcast.widen.filter(match);
+    const cardP = o => `<div class="card">
+      <h3>${esc(o.title)}</h3>
+      <div class="meta"><span class="tag src">${esc(o.host)}</span></div>
+      <p class="sum">${esc(o.summary)}</p>
+      ${o.why?`<div class="why"><b>为什么值得你试试：</b>${esc(o.why)}</div>`:""}
+      <div class="row" style="margin-top:10px">
+        <a class="linkbtn" href="${esc(o.url)}" target="_blank" rel="noopener">去收听 ↗</a>
+        ${star(o.id)}
+      </div></div>`;
+    return `<div class="cols">
+      <div><div class="colhead">你可能喜欢 · 口味相近的深度对谈</div>${L.length?L.map(cardP).join(""):'<div class="empty">没有匹配的内容</div>'}</div>
+      <div><div class="colhead b">故意拓宽 · 跨领域的另一种声音</div>${W.length?W.map(cardP).join(""):'<div class="empty">没有匹配的内容</div>'}</div>
+    </div>`;
+  },
+  book(){
+    return DATA.book.map(g=>{
+      const its = g.items.filter(match);
+      if(!its.length) return "";
+      return `<div class="stage">
+        <div class="stage-h"><h2>${esc(g.name)}</h2></div>
+        ${its.map(o=>`<div class="card">
+          <h3>${esc(o.title)}</h3>
+          <div class="meta"><span class="tag src">${esc(o.author)}</span></div>
+          <p class="sum">${esc(o.summary)}</p>
+          <div class="row"><a class="linkbtn" href="${esc(o.url)}" target="_blank" rel="noopener">查看详情 ↗</a>${star(o.id)}</div>
+        </div>`).join("")}
+      </div>`;
+    }).join("") || `<div class="empty">没有匹配的内容</div>`;
+  },
+  fav(){
+    const ids = [...state.favs];
+    if(!ids.length) return `<div class="empty">还没有收藏。<br>点任意卡片右下角的「☆ 收藏」，内容就会固定在这里，不会随更新消失。</div>`;
+    const cards = ids.map(id=>{
+      const o = INDEX[id]; if(!o) return "";
+      if(o._tab==="psych"||o._tab==="tennis") return lessonCard(o, o._tab);
+      if(o._tab==="book"||o._tab==="podcast"){
+        return `<div class="card">
+          <h3>${esc(o.title)}</h3>
+          <div class="meta"><span class="tag src">${esc(o.author||o.host||"")}</span><span class="tag">${o._tab==="book"?"书籍":"播客"}</span></div>
+          <p class="sum">${esc(o.summary)}</p>
+          ${o.why?`<div class="why"><b>为什么值得你试试：</b>${esc(o.why)}</div>`:""}
+          <div class="row"><a class="linkbtn" href="${esc(o.url)}" target="_blank" rel="noopener">${o._tab==="book"?"查看详情 ↗":"去收听 ↗"}</a>${star(o.id)}</div>
+        </div>`;
+      }
+      return articleCard(o);
+    }).join("");
+    return `<div class="sect"><h2>我的收藏夹</h2><span class="note">${ids.length} 条 · 永久保留</span></div>${cards}`;
+  }
+};
+
+/* 渲染 */
+function renderNav(){
+  document.getElementById("nav").innerHTML = TABS.map(t=>
+    `<button class="${state.showFav?"":(state.tab===t.k?"on":"")}" data-tab="${t.k}"><span class="ic">${t.ic}</span>${t.s}</button>`
+  ).join("");
+}
+function render(){
+  renderNav();
+  const fb = document.getElementById("favbtn");
+  fb.classList.toggle("on", state.showFav);
+  document.getElementById("favn").textContent = state.favs.size;
+  const cur = TABS.find(t=>t.k===state.tab);
+  document.getElementById("hdsub").textContent = state.showFav ? "收藏夹" : (cur?cur.n:"");
+  document.getElementById("view").innerHTML = state.showFav ? VIEWS.fav() : VIEWS[state.tab]();
+}
+document.getElementById("bd").textContent = DATA.buildDate;
+
+/* 搬家：进度码（换文件时把已学 + 收藏搬过去） */
+function makeCode(){
+  try{ return btoa(JSON.stringify({v:1,d:[...state.done],f:[...state.favs]})); }
+  catch(e){ return ""; }
+}
+function applyCode(s){
+  s = (s||"").trim(); if(!s) return 0;
+  let o;
+  try{ o = JSON.parse(atob(s)); }catch(e){ return -1; }
+  if(!o || typeof o !== "object") return -1;
+  let n = 0;
+  (o.d||[]).forEach(x=>{ if(!state.done.has(x)){ state.done.add(x); n++; } });
+  (o.f||[]).forEach(x=>{ if(!state.favs.has(x)){ state.favs.add(x); n++; } });
+  return n;
+}
+const syncPanel = document.getElementById("syncpanel");
+document.getElementById("syncbtn").addEventListener("click", ()=>{
+  const on = !syncPanel.classList.contains("show");
+  syncPanel.classList.toggle("show", on);
+  document.getElementById("codeout").value = makeCode();
+  if(on) syncPanel.scrollIntoView({behavior:"smooth",block:"start"});
+});
+document.getElementById("btncopy").addEventListener("click", ()=>{
+  const t = document.getElementById("codeout");
+  t.value = makeCode();
+  let ok = false;
+  try{
+    t.select(); t.setSelectionRange(0, 999999);
+    ok = document.execCommand("copy");
+  }catch(e){ ok = false; }
+  if(!ok && navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t.value).then(()=>toast("已复制，存到微信「文件传输助手」里"));
+    return;
+  }
+  toast(ok ? "已复制，存到微信「文件传输助手」里" : "复制失败，请长按框里的码手动复制");
+});
+document.getElementById("btnimport").addEventListener("click", ()=>{
+  const n = applyCode(document.getElementById("codein").value);
+  if(n < 0){ toast("这串码不对，检查一下有没有复制全"); return; }
+  if(n === 0){ toast("码没问题，但里面的内容你这边已经有了"); }
+  else{ toast("导入成功，恢复了 " + n + " 条"); }
+  save(); document.getElementById("codein").value = "";
+  syncPanel.classList.remove("show"); render();
+});
+document.getElementById("btnclose").addEventListener("click", ()=>{ syncPanel.classList.remove("show"); });
+
+/* 事件 */
+document.getElementById("nav").addEventListener("click", e=>{
+  const b = e.target.closest("[data-tab]"); if(!b) return;
+  state.tab = b.dataset.tab; state.showFav = false; state.q = ""; document.getElementById("q").value = "";
+  save(); window.scrollTo({top:0,behavior:"smooth"}); render();
+});
+document.getElementById("favbtn").addEventListener("click", ()=>{
+  state.showFav = !state.showFav; state.q=""; document.getElementById("q").value="";
+  window.scrollTo({top:0,behavior:"smooth"}); render();
+});
+document.getElementById("q").addEventListener("input", e=>{ state.q = e.target.value.trim(); render(); });
+document.getElementById("view").addEventListener("click", e=>{
+  const f = e.target.closest("[data-fav]");
+  if(f){ const id=f.dataset.fav;
+    if(state.favs.has(id)){ state.favs.delete(id); toast("已取消收藏"); }
+    else { state.favs.add(id); toast("已加入收藏夹"); }
+    save(); render(); return; }
+  const d = e.target.closest("[data-done]");
+  if(d){ const id=d.dataset.done;
+    if(state.done.has(id)){ state.done.delete(id); } else { state.done.add(id); toast("已标记学完"); }
+    save(); render(); return; }
+  const g = e.target.closest("[data-go]");
+  if(g){ const el=document.getElementById("L-"+g.dataset.go);
+    if(el){ el.scrollIntoView({behavior:"smooth",block:"center"}); el.style.boxShadow="0 0 0 3px var(--accent-soft)";
+      setTimeout(()=>el.style.boxShadow="",1800); } return; }
+});
+
+render();
+</script>
+</body>
+</html>
