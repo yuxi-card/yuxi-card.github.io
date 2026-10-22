@@ -833,10 +833,18 @@ function render(){
   fb.classList.toggle("on", state.showFav);
   document.getElementById("favn").textContent = state.favs.size;
   const cur = TABS.find(t=>t.k===state.tab);
-  document.getElementById("hdsub").textContent = state.showFav ? "收藏夹" : (cur?cur.n:"");
+  const bdS = DATA.buildDate ? " · " + DATA.buildDate.slice(5).replace("-","/") : "";
+  document.getElementById("hdsub").innerHTML = state.showFav ? "收藏夹" : ((cur?cur.n:"") + bdS);
   document.getElementById("view").innerHTML = state.showFav ? VIEWS.fav() : VIEWS[state.tab]();
 }
-document.getElementById("bd").textContent = DATA.buildDate;
+/* 内容新鲜度：今天没更新就标出来，免得她以为看到的是今天的 */
+(function(){
+  const d = new Date();
+  const today = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const bd = DATA.buildDate || "";
+  const el = document.getElementById("bd");
+  el.innerHTML = bd + (!bd || bd === today ? "" : "　<span style=\"color:#b4622d;font-weight:600\">（今天还没更新）</span>");
+})();
 
 /* 搬家：进度码（换文件时把已学 + 收藏搬过去） */
 function makeCode(){
