@@ -156,6 +156,12 @@ header{
 .newitem{display:flex;align-items:center;gap:8px;background:#fbf7f2;border-radius:8px;padding:7px 10px}
 .newitem span{flex:1;font-size:13px;line-height:1.45}
 .newitem button{border:none;background:var(--accent);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.kidrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:#fbf7f2;border-radius:8px;padding:9px 11px;margin-bottom:7px}
+.kidname{font-size:13.5px;font-weight:700;color:var(--accent)}
+.kidage{font-size:12px;color:var(--sub)}
+.kidnote{font-size:12px;color:var(--sub);line-height:1.6;flex-basis:100%;margin:1px 0 2px}
+.kidrow button{border:none;background:var(--accent);color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;line-height:1.3}
+.kidrow button.on{background:#8a9a7b}
 ul.pts{margin:0;padding-left:18px;font-size:14px;color:#4a453f}
 ul.pts li{margin-bottom:3px}
 dl.con{margin:0;font-size:13.5px}
@@ -377,26 +383,27 @@ const DATA = {
     {stage:"ps2", id:"psy-114", title:"记忆的真相：为什么记忆每次回忆都在被改写"},
     {stage:"ps5", id:"psy-226", title:"群体与网络：为什么网上比现实更容易极端"}
   ],
+  kids: [{n:"老大", y:12, at:"2026-10-24"}, {n:"老二", y:9, at:"2026-10-24"}],
   parentWeek: {from:"2026-10-24", ids:["pa-101","pa-102"]},
   parentLastAdd: "2026-10-24",
   parentRoadmap: [
     {stage:"第 2 模块 · 0-3 岁：安全感与自主", id:"pa-204", title:"二胎与手足关系：怎么让老大不觉得被取代"},
-    {stage:"第 4 模块 · 6-12 岁：学习与习惯", id:"pa-405", title:"电子产品与屏幕时间：怎么谈规则不谈控制"},
-    {stage:"第 6 模块 · 沟通的方法论", id:"pa-605", title:"夸奖失效之后：如何激发内驱力"},
-    {stage:"第 3 模块 · 3-6 岁：主动性与习惯的窗口", id:"pa-304", title:"情绪教育：教孩子认识和表达情绪"},
     {stage:"第 5 模块 · 青春期：关系的重构", id:"pa-505", title:"择友、网络与价值观：如何不靠监控保持影响"},
+    {stage:"第 4 模块 · 6-12 岁：学习与习惯", id:"pa-405", title:"电子产品与屏幕时间：怎么谈规则不谈控制"},
+    {stage:"第 5 模块 · 青春期：关系的重构", id:"pa-506", title:"性教育与身体边界：什么时候说、由谁来说"},
+    {stage:"第 6 模块 · 沟通的方法论", id:"pa-605", title:"夸奖失效之后：如何激发内驱力"},
+    {stage:"第 4 模块 · 6-12 岁：学习与习惯", id:"pa-407", title:"同伴与校园社交：被排挤、被起外号时家长怎么做"},
     {stage:"第 7 模块 · 家风与长期", id:"pa-703", title:"钱与劳动：给孩子建立的第一套经济观"},
-    {stage:"第 4 模块 · 6-12 岁：学习与习惯", id:"pa-406", title:"兴趣班怎么选：什么时候该坚持，什么时候该停"},
-    {stage:"第 1 模块 · 看懂孩子：发展的底层逻辑", id:"pa-104", title:"游戏为什么重要：玩也是正经事"}
+    {stage:"第 4 模块 · 6-12 岁：学习与习惯", id:"pa-406", title:"兴趣班怎么选：什么时候该坚持，什么时候该停"}
   ],
   investWeek: {from:"2026-10-24", ids:["iv-101","iv-102"]},
   investLastAdd: "2026-10-24",
   investRoadmap: [
     {stage:"第 3 模块 · 认识工具：基金到底是什么", id:"iv-304", title:"主动基金怎么看：基金经理、持仓与更换信号"},
+    {stage:"第 2 模块 · 家庭财务的地基", id:"iv-204", title:"教育金与养老金：两笔长期钱怎么分别规划"},
     {stage:"第 4 模块 · 指数基金：普通人的主力武器", id:"iv-405", title:"行业指数与主题基金：为什么新手容易在这里亏钱"},
     {stage:"第 5 模块 · 定投：怎么买，以及更难的怎么卖", id:"iv-505", title:"定投中断与重启：什么样的暂停是合理的"},
     {stage:"第 6 模块 · 资产配置：收益的大头来自这里", id:"iv-604", title:"黄金、QDII 与海外资产：普通人要不要配"},
-    {stage:"第 2 模块 · 家庭财务的地基", id:"iv-204", title:"教育金与养老金：两笔长期钱怎么分别规划"},
     {stage:"第 7 模块 · 投资心理与市场常识", id:"iv-704", title:"家庭财务会议：和伴侣把钱的规则谈清楚"},
     {stage:"第 4 模块 · 指数基金：普通人的主力武器", id:"iv-406", title:"红利指数与价值风格：稳健派的一种选择"},
     {stage:"第 1 模块 · 先修：钱观与财务体检", id:"iv-104", title:"记账一年后该看什么：从流水到财务结构"}
@@ -1439,6 +1446,59 @@ function weekCard(w, stages){
       <div class="newlist">${news.map(l=>`<div class="newitem"><span>${state.done.has(l.id)?"✓ ":""}${esc(l.title)}</span><button data-go="${esc(l.id)}">去学习</button></div>`).join("")}</div>
     </div>`;
 }
+function ageOf(k){
+  const t0 = new Date(k.at + "T00:00:00").getTime();
+  return k.y + Math.floor((Date.now() - t0) / 31557600000);
+}
+function modForAge(a){
+  if(a <= 3) return "0-3 岁";
+  if(a <= 6) return "3-6 岁";
+  if(a <= 11) return "6-12 岁";
+  return "青春期";
+}
+function ageLabel(a){
+  if(a >= 12) return "青春期早期";
+  if(a >= 7) return "童年中期";
+  if(a >= 4) return "学前期";
+  return "婴幼儿期";
+}
+function ageNote(a){
+  if(a >= 12) return "青春期已经开始了：身体、荷尔蒙和大脑的奖赏系统都在重排，情绪起伏大、更在意同伴怎么看、对「被管」极度敏感。这两年最重要的不是管住他，而是把关系留住——他遇到事愿意先找你，你才真的影响得了他。";
+  if(a >= 7) return "具体运算阶段：已经能讲逻辑，但还要靠具体的事撑着，空讲道理听不进去。这几年是「勤奋感 vs 自卑感」的定型期，习惯、专注力和「我能行」的自信在这里长成，比一次考试分数重要得多。";
+  if(a >= 4) return "主动性与好奇心的窗口期：什么都想自己来、问题特别多。这时候压制好奇心的代价，比让他犯错的代价大得多。";
+  return "依恋和安全感打底的阶段：规律、及时回应和稳定的情绪环境，比任何早教都管用。";
+}
+function pickLessons(modKey, stages, n){
+  const s = stages.find(x => x.name.indexOf(modKey) >= 0);
+  if(!s) return [];
+  const un = s.lessons.filter(l => !state.done.has(l.id));
+  return (un.length ? un : s.lessons).slice(0, n);
+}
+function kidsHtml(stages){
+  const ks = DATA.kids || [];
+  if(!ks.length) return "";
+  const rows = ks.map(k=>{
+    const a = ageOf(k);
+    const ls = pickLessons(modForAge(a), stages, 2);
+    if(!ls.length) return "";
+    return `<div class="kidrow">
+      <span class="kidname">${esc(k.n)}</span><span class="kidage">${a} 岁 · ${esc(ageLabel(a))} · ${esc(modForAge(a))}</span>
+      <div class="kidnote">${esc(ageNote(a))}</div>
+      ${ls.map(l=>`<button class="${state.done.has(l.id)?"on":""}" data-go="${esc(l.id)}">${state.done.has(l.id)?"✓ ":""}${esc(l.title.length>16?l.title.slice(0,16)+"…":l.title)}</button>`).join("")}
+    </div>`;
+  }).join("");
+  if(!rows) return "";
+  const both = pickLessons("沟通的方法论", stages, 2);
+  const common = `<div class="kidrow">
+      <span class="kidname">两个都适用</span><span class="kidage">${ks.map(k=>ageOf(k)+" 岁").join(" / ")}</span>
+      <div class="kidnote">相差 ${Math.abs(ageOf(ks[0]) - ageOf(ks[1]))} 岁，正好是最容易互相比较、也最容易联手的一段时间。沟通的方法对两个人都成立，而「不拿两个孩子比」这条底线要一直守住。</div>
+      ${both.map(l=>`<button class="${state.done.has(l.id)?"on":""}" data-go="${esc(l.id)}">${state.done.has(l.id)?"✓ ":""}${esc(l.title.length>16?l.title.slice(0,16)+"…":l.title)}</button>`).join("")}
+    </div>`;
+  return `<div class="newcard">
+      <div class="nt">按你家孩子的年龄 · 现在最该看这几课</div>
+      ${rows}${common}
+    </div>`;
+}
 function readsHtml(list){
   if(!list || !list.length) return "";
   const l = list.filter(match);
@@ -1483,7 +1543,7 @@ const VIEWS = {
   },
   parent(){
     const c = (DATA.parent||{}).course || [];
-    return PARENT_INTRO + weekCard(DATA.parentWeek, c) + progressHtml(c,"parent") + stageHtml(c,"parent") + readsHtml((DATA.parent||{}).reads);
+    return PARENT_INTRO + kidsHtml(c) + weekCard(DATA.parentWeek, c) + progressHtml(c,"parent") + stageHtml(c,"parent") + readsHtml((DATA.parent||{}).reads);
   },
   invest(){
     const c = (DATA.invest||{}).course || [];
